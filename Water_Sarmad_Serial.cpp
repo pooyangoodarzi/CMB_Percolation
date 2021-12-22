@@ -1,4 +1,4 @@
-#include"HKPBC.h"
+#include"HKPBC_Serial.h"
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
@@ -22,63 +22,90 @@
 
 using namespace std;
 
-#define N 50320512
-#define Lx 5016
-#define Ly 10032
-#define Nsplit 88
+#define N 12288
+#define Lx 32
+#define Ly 32
+#define Nsplit 1
+#define patch_count 12
 
 
-vector<vector<int>> split (const std::vector<int>& v);
+vector<vector<int>> split (const vector<int>& v, int Num);
+vector<int> flatten(const vector<vector<int>> &orig);
 double cosine(vector<double> plat);
 vector<int> Divisors(int n);
-vector<vector<double>> water_clusters(int ii, int const& num_iter,vector<int> indexes, double total_lat, vector<double> plat, int PBS_Pos);
+vector<vector<double>> water_clusters(int ii, int const& num_iter,vector<int> indexes, double total_lat, vector<double> plat, int PBS_Pos, vector<vector<int>> niegh);
 
 int main()
 {
     double total_lat;
     vector<double> final_total_landmass;
     vector<double> final_big_cluster;
+    // vector<vector<int>> niegh;
+    vector<double> pmap, plat, pmap_tot;
+    string line;
+    vector<int> temp;
 
-    // //opening data with cnpy
-    // cnpy::NpyArray arr = cnpy::npy_load("/home/complex/c++/Rewrite_c++/HKPBC/pmap_22.npy");
-    // double* pmap = arr.data<double>();
 
-    // cnpy::NpyArray arr1 = cnpy::npy_load("/home/complex/c++/Rewrite_c++/HKPBC/plat_22.npy");
-    // double* plat = arr1.data<double>();
-    std::vector<double> pmap, plat;
-    std::string line;
+    for(int files = 0; files < patch_count ;files++)
+    {   
+        ostringstream filename;
+        filename << "/home/complex/HK_Serial/Data/" << files << ".txt";
+        ifstream input(filename.str());
+        while(getline(input, line))
+        {
+            std::istringstream lineStream(line);
+            double first;
+            lineStream >> first;
+            pmap.push_back(first);
+            pmap_tot.push_back(first);
 
-    std::ifstream myFile("/share/users/m_movahed/cmb_cluster/s0_c++/pmap.txt");
-    while(getline(myFile, line))
-    {
-        std::istringstream lineStream(line);
-        double first;
-        lineStream >> first;
-        pmap.push_back(first);
+        } 
     }
 
-    std::ifstream myFile1("/share/users/m_movahed/cmb_cluster/s0_c++/plat.txt");
-    while(getline(myFile1, line))
-    {
-        std::istringstream lineStream(line);
-        double first;
-        lineStream >> first;
-        plat.push_back(first);
+
+
+    string line1;
+    for(int files = 0; files < patch_count ;files++)
+    {   
+        ostringstream filename;
+        filename << "/home/complex/HK_Serial/Lat/" << files << ".txt";
+        ifstream input(filename.str());
+        while(getline(input, line1))
+        {
+            std::istringstream lineStream(line1);
+            double first;
+            lineStream >> first;
+            plat.push_back(first);
+        } 
+
     }
+
+    std::string line2;
+    std::ifstream myFile4("/home/complex/HK_Serial/niegh.txt"); 
+    while(getline(myFile4, line2))
+    {
+        std::istringstream lineStream(line2);
+        int first1;
+        lineStream >> first1;
+        temp.push_back(first1);
+    }
+    
+    auto niegh = split(temp, 12);
+
     //calculating cosine of the all the elements in plat
     total_lat = cosine(plat);
     cout<<total_lat<<endl;
 
     //sorting the indexes
-    vector<int> indexes(N);
+    vector<int> indexes(patch_count*Lx*Ly);
     std::iota(indexes.begin(),indexes.end(),0); //Initializing
-    sort(indexes.begin(), indexes.end(), [&](int i,int j){return pmap[i]<pmap[j];} );
+    sort(indexes.begin(), indexes.end(), [&](int i,int j){return pmap_tot[i]<pmap_tot[j];} );
 
     //Defining PBS Variables
-    auto PBS_index = split(indexes);
-    int PBS_counter = two;
+    auto PBS_index = split(indexes, Nsplit);
+    int PBS_counter = 0;
     int PBS_Pos = PBS_counter*PBS_index[0].size();
-    //cout<<PBS_index[0].size()<<"_"<<PBS_index[1].size()<<endl;
+    // cout<<PBS_index[0].size()<<endl;
 
 
 
@@ -87,8 +114,8 @@ int main()
     divisions = Divisors(PBS_index[0].size());
     int num_iter = divisions[ceil(divisions.size()/2)];
     int num_proc = int(PBS_index[0].size()/num_iter);
-    // int num_iter = 8;
-    // int num_proc = 4;
+    // int num_iter = 12288;
+    // int num_proc = 1;
     printf("num_proc = %d \n", num_proc);
     printf("num_iter = %d \n", num_iter);
 
@@ -98,7 +125,7 @@ int main()
 
     for (int j = 0; j< num_proc; j++)
     {
-        futures.push_back(std::async(std::launch::async, water_clusters, j, num_iter, indexes, total_lat, plat, PBS_Pos));
+        futures.push_back(std::async(std::launch::async, water_clusters, j, num_iter, indexes, total_lat, plat, PBS_Pos, niegh));
     }
 
     // collecting the resualt of the future
@@ -114,7 +141,7 @@ int main()
 
     // for (int j = 0; j< 1; j++)//num_proc
     // {
-    //     std::future<vector<vector<double>>> futu = std::async(std::launch::async, water_clusters, j, num_iter, indexes, total_lat, plat);
+    //     std::future<vector<vector<double>>> futu = std::async(std::launch::async, water_clusters,  j, 1, indexes, total_lat, plat, PBS_Pos, niegh);
     //     auto results = futu.get();
     //     std::copy(results[0].begin(), results[0].end(),  back_inserter(final_total_landmass));
     //     std::copy(results[1].begin(), results[1].end(),  back_inserter(final_big_cluster));
@@ -122,13 +149,11 @@ int main()
     // }
 
     //saving the data in npy format
-    string path1 = "/share/users/m_movahed/cmb_cluster/s0_c++/";
-    string path = "/share/users/m_movahed/cmb_cluster/s0_c++/";
-    string filename = "total_landmass_" + to_string(one) + "_" + to_string(PBS_counter) + ".txt";
-    string filename1 = "big_cluster_" + to_string(one) + "_" + to_string(PBS_counter) + ".txt";
+    string path1 = "/home/complex/HK_Serial/Result/";
+    string path = "/home/complex/HK_Serial/Result/";
+    string filename = "total_landmass_" + to_string(32) + "_" + to_string(PBS_counter) + ".txt";
+    string filename1 = "big_cluster_" + to_string(32) + "_" + to_string(PBS_counter) + ".txt";
 
-    // cnpy::npy_save(path + filename , &final_total_landmass[0],{N},"w");
-    // cnpy::npy_save(path1 + filename1 , &final_big_cluster[0],{N},"w");
 
     std::ofstream fout(path + filename);
     fout.precision(17);
@@ -138,19 +163,29 @@ int main()
     fout1.precision(17);
     std::copy(final_big_cluster.begin(), final_big_cluster.end(),std::ostream_iterator<double>(fout1, "\n"));
 
-        return 0;
+    return 0;
 }
 
+//flatten Function
+vector<int> flatten(const vector<vector<int>> &orig)
+{   
+    vector<int> ret;
+    for(const auto &v: orig)
+        ret.insert(ret.end(), v.begin(), v.end());                                                                                         
+    return ret;
+} 
+
 //Split Function
-std::vector<std::vector<int>> split (const std::vector<int>& v)
+vector<vector<int>> split(const std::vector<int>& v, int Num)
 {
     int n = v.size();
-    int size_max = n / Nsplit + (n % Nsplit != 0);
-    std::vector<std::vector<int>> split;
-    for (int ibegin = 0; ibegin < n; ibegin += size_max) {
+    int size_max = int(n/Num) ;
+    vector<vector<int>> split;
+    for (int ibegin = 0; ibegin < n; ibegin += size_max) 
+    {
         int iend = ibegin + size_max;
         if (iend > n) iend = n;
-        split.emplace_back (std::vector<int>(v.begin() + ibegin, v.begin() + iend));
+        split.emplace_back (vector<int>(v.begin() + ibegin, v.begin() + iend));
     }
     return split;
 }
@@ -177,7 +212,7 @@ vector<int> Divisors(int n)
 double cosine(vector<double> plat)
 {
     double sum = 0;
-    for (int i = 0; i <N; i++)
+    for (int i = 0; i < plat.size(); i++)
     {
         sum = sum + abs(cos(plat[i]));
     }
@@ -185,48 +220,64 @@ double cosine(vector<double> plat)
 }
 
 //main water function
-vector<vector<double>> water_clusters(int ii, int const& num_iter, vector<int> indexes, double total_lat, vector<double> plat, int PBS_Pos)
+vector<vector<double>> water_clusters(int ii, int const& num_iter, vector<int> indexes, double total_lat, vector<double> plat, int PBS_Pos, vector<vector<int>> niegh)
 {
     int l = ii*num_iter;
-
     vector<double> total_landmass;
     vector<double> big_cluster;
     vector<vector<double>> result;
     double pp;
+    HKPBC object(Lx,Ly,Lx*Ly);
     vector<int> s;
-    HKPBC object(Lx,Ly,N);
-
-
-    for (int ii=l; ii< l + num_iter; ii++)
+    for (int ii=l; ii< l + num_iter; ii++) 
     {
+        // cout<<ii<<endl;
         vector<int> myBoolArray(N);
-        for (int m=0; m< (ii+1)+PBS_Pos; m++)
+        for (int m=0; m< (ii+1)+PBS_Pos; m++) 
         {
             myBoolArray[indexes[m]] = 1;
         }
-        s = object.HK(myBoolArray);
+
+        auto newarr = split(myBoolArray, patch_count);
+        int lastlab = 0;
+
+        for(int k =0; k < patch_count; k++)
+        {
+            lastlab = object.HK(newarr[k], lastlab);
+            // cout<<"lastlab: "<<lastlab<<endl;
+        }
+        s = object.serial(niegh, newarr, lastlab);
+
+        auto myvector = flatten(newarr);
+
+        // cout<<"size: "<<myvector.size()<<endl;
+        // for (int i = 0; i < s.size(); i++)
+        // {
+        //     cout<<s[i]<<",";
+        // }
+        // cout<<endl;
+        
+
         vector<double> allclusters;
 
         if (s.size() >= 3)
         {
             for(int j=0; j < 3; j++)
             {
-                valarray<int> mask ( &(myBoolArray[0]), N);
+                valarray<int> mask ( &(myvector[0]), N);
                 mask[mask < s.rbegin()[j]] = 0;
                 mask[mask > s.rbegin()[j]] = 0;
                 mask[mask == s.rbegin()[j]] = 1;
 
                 vector<double> masklat;
-                double sum =0;
                 for(int k=0; k<N; k++)
                 {
-                    masklat.push_back(plat[k] * mask[k]);
-                    if(masklat[k] != 0)
+                    if(mask[k] != 0)
                     {
-                        sum = sum + abs(cos(masklat[k]));
+                        masklat.push_back(plat[k] * mask[k]);
                     }
                 }
-                allclusters.push_back(sum);
+                allclusters.push_back(cosine(masklat));
             }
         }
 
@@ -234,23 +285,20 @@ vector<vector<double>> water_clusters(int ii, int const& num_iter, vector<int> i
         {
             for(int j=0; j < 2; j++)
             {
-                valarray<int> mask ( &(myBoolArray[0]), N);
+                valarray<int> mask ( &(myvector[0]), N);
                 mask[mask < s.rbegin()[j]] = 0;
                 mask[mask > s.rbegin()[j]] = 0;
                 mask[mask == s.rbegin()[j]] = 1;
 
                 vector<double> masklat;
-                double sum =0;
                 for(int k=0; k<N; k++)
                 {
-                    masklat.push_back(plat[k] * mask[k]);
-                    if(masklat[k] != 0)
+                    if(mask[k] != 0)
                     {
-                        sum = sum + abs(cos(masklat[k]));
+                        masklat.push_back(plat[k] * mask[k]);
                     }
                 }
-
-                allclusters.push_back(sum);
+                allclusters.push_back(cosine(masklat));
             }
 
         }
@@ -258,7 +306,7 @@ vector<vector<double>> water_clusters(int ii, int const& num_iter, vector<int> i
         {
             for(int j=0; j < 1; j++)
             {
-                valarray<int> mask ( &(myBoolArray[0]), N);
+                valarray<int> mask ( &(myvector[0]), N);
                 mask[mask < s.rbegin()[j]] = 0;
                 mask[mask > s.rbegin()[j]] = 0;
                 mask[mask == s.rbegin()[j]] = 1;
@@ -267,14 +315,12 @@ vector<vector<double>> water_clusters(int ii, int const& num_iter, vector<int> i
                 double sum =0;
                 for(int k=0; k<N; k++)
                 {
-                    masklat.push_back(plat[k] * mask[k]);
-                    if(masklat[k] != 0)
+                    if(mask[k] != 0)
                     {
-                        sum = sum + abs(cos(masklat[k]));
+                        masklat.push_back(plat[k] * mask[k]);
                     }
                 }
-
-                allclusters.push_back(sum);
+                allclusters.push_back(cosine(masklat));
             }
         }
 
@@ -283,6 +329,7 @@ vector<vector<double>> water_clusters(int ii, int const& num_iter, vector<int> i
         // cout<<"big_cluster = "<<*max_element(allclusters.begin(), allclusters.end()) / total_lat<<endl;
         total_landmass.push_back(pp);
     }
+
 
     result.push_back(total_landmass);
     result.push_back(big_cluster);
