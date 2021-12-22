@@ -231,7 +231,6 @@ vector<vector<double>> water_clusters(int ii, int const& num_iter, vector<int> i
     vector<int> s;
     for (int ii=l; ii< l + num_iter; ii++) 
     {
-        // cout<<ii<<endl;
         vector<int> myBoolArray(N);
         for (int m=0; m< (ii+1)+PBS_Pos; m++) 
         {
