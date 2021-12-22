@@ -1,4 +1,4 @@
-#include"HKPBC.h"
+#include"HKPBC_Serial.h"
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
@@ -11,6 +11,7 @@
 #include <ctime>  
 #include <stdio.h>
 #include <stdlib.h>
+#include <numeric>
 
 using namespace std;
 
@@ -20,8 +21,6 @@ HKPBC :: HKPBC(int a, int b, int c)
 	Lx = a;
 	Ly = b;
 	size = c;
-	uf_Ginitialize(size / 2);
-
 }
 
 
@@ -40,6 +39,14 @@ int HKPBC:: uf_find(int x)
 	  return y;
 	}
 
+void HKPBC:: pbc_union(vector<vector<int>> &total, int oldlabel, int newlabel)
+{
+	for (int i = 0; i < total.size(); i++)
+	{
+		replace(total[i].begin(), total[i].end(), oldlabel, newlabel);
+	}
+	
+}
 
 	// int HKPBC:: uf_find_g(int x, std::vector<int> &matrix) 
 	// {
@@ -60,16 +67,16 @@ int HKPBC:: uf_find(int x)
 	// }
 	
 	
-void HKPBC:: uf_pbc(vector<int> &matrix)
-	{
-		for(int i=0; i<Lx; i++)
-	  {
-		if(matrix[Ly * i] && matrix[Ly * i + (Ly-1)] && labels[matrix[Ly * i]]!= labels[matrix[Ly * i + (Ly-1)]])
-		{   
-			matrix[Ly * i] = uf_union(matrix[Ly * i], matrix[Ly * i + (Ly-1)]);
-		}
-	  } 	
-	}
+// void HKPBC:: uf_pbc(vector<int> &matrix)
+// 	{
+// 		for(int i=0; i<Lx; i++)
+// 	  {
+// 		if(matrix[Ly * i] && matrix[Ly * i + (Ly-1)] && labels[matrix[Ly * i]]!= labels[matrix[Ly * i + (Ly-1)]])
+// 		{   
+// 			matrix[Ly * i] = uf_union(matrix[Ly * i], matrix[Ly * i + (Ly-1)]);
+// 		}
+// 	  } 	
+// 	}
 	
 
 int HKPBC:: uf_union(int x, int y) 
@@ -93,20 +100,14 @@ int HKPBC:: uf_make_set(void)
 	}
 	
 
-void HKPBC:: uf_initialize(int max_labels, int last_label, int rank) 
+void HKPBC:: uf_initialize(int max_labels) 
 	{	
-	  n_labels = (rank * max_labels);
-	  labels = static_cast<int*>(calloc(sizeof(int), n_labels));
-	  labels[0] = last_label;
-	//   cout<<labels[0]<<endl;
+	  n_labels = max_labels;
+	  labels = static_cast<int*>(calloc(sizeof(int), max_labels));
+	  labels[0] = 0;
 	}
 
-void HKPBC:: uf_Ginitialize(int max_labels_g) 
-	{	
-	  n_labels_g = max_labels_g;
-	  labels_g = static_cast<int*>(calloc(sizeof(int), n_labels_g));
-	  labels_g[0] = 0;
-	}
+
 	
 void HKPBC:: uf_done(void) 
 	{
@@ -115,17 +116,15 @@ void HKPBC:: uf_done(void)
 	  labels = 0;
 	}
 	
-int HKPBC::HK(vector<int> &matrix, int rank, int last_label) //vector<int>
+int HKPBC::HK(vector<int> &matrix, int last_label) //vector<int>
 	{
-	
-		uf_initialize((Ly * Lx / 2), last_label, rank);
+		uf_initialize((Ly * Lx)/2);
 		for (int i=0; i<Lx; i++)
 		{
 			for (int j=0; j<Ly; j++)
-			{
+			{	
 				if (matrix[Ly * i + j]) // if occupied ...
 				{                        
-	
 					int up = (i==0 ? 0 : matrix[Ly * (i - 1) + j]);    //  look up  
 					int left = (j==0 ? 0 : matrix[Ly * i + (j - 1)]);  //  look left
 					
@@ -150,9 +149,8 @@ int HKPBC::HK(vector<int> &matrix, int rank, int last_label) //vector<int>
 
 	//   uf_pbc(matrix);   //applying the periodic boundary condition
 	
-	  int *new_labels = static_cast<int*>(calloc(sizeof(int), n_labels)); // allocate array, initialized to zero
+	  int *new_labels = static_cast<int*>(calloc(sizeof(int), (Ly * Lx)/2)); // allocate array, initialized to zero
 	  new_labels[0] = last_label;
-	  
 	  for (int i=0; i<Lx; i++)
 	  {
 	    for (int j=0; j<Ly; j++)
@@ -170,8 +168,6 @@ int HKPBC::HK(vector<int> &matrix, int rank, int last_label) //vector<int>
 		}
 	  }
 
-
-	  
 	  int total_clusters = new_labels[0];	
 	//   cout<<"total: "<<total_clusters<<endl;
 	  free(new_labels);
@@ -230,73 +226,271 @@ int HKPBC::HK(vector<int> &matrix, int rank, int last_label) //vector<int>
 	  return total_clusters;
 	}
 
-void HKPBC:: Hks_pbc(vector<int> &A, vector<int> &B, int j)
+void HKPBC:: Hks_pbc(vector<int> &A, vector<int> &B, vector<vector<int>> &total, int j, int k)
 {
 	int temp,temp1;
 	if(j==0)
 	{
-		// cout<<"j: "<<j<<endl;
-		for(int i=0; i<Ly; i++)
+		if(k==0)
 		{
-			// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
-			if(A[i] != 0 && B[i + (Lx-1)*Ly] != 0 && A[i]!= B[i + (Lx-1)*Ly])
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Ly; i++)
 			{
-				temp = B[i + (Lx-1)*Ly];
-				temp1 = min(A[i], B[i + (Lx-1)*Ly]);
-				// cout<<A[i]<<","<<B[i + (Lx-1)*Ly]<<endl;
-				replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-				// if(std::find(B.begin(), B.end(), temp) != B.end()) 
-				// {
-				// 	cout<<"hi"<<endl;
-				// }
+				// cout<<i<<","<<A[i]<<" "<<i<<","<<B[i]<<endl;
+				if(A[i] != 0 && B[i] != 0 && A[i]!= B[i])
+				{
+					temp = B[i];
+					temp1 = min(A[i], B[i]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
+			}
+		}
+
+		if(k==1)
+		{
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Ly; i++)
+			{
+				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
+				if(A[i] != 0 && B[i + (Lx-1)*Ly] != 0 && A[i]!= B[i + (Lx-1)*Ly])
+				{
+					temp = B[i + (Lx-1)*Ly];
+					temp1 = min(A[i], B[i + (Lx-1)*Ly]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+
+				}
+			}
+		}
+		if(k==2)
+		{
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Lx; i++)
+			{
+				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
+				if(A[i] != 0 && B[(Lx*i)] != 0 && A[i]!= B[(Lx*i)])
+				{
+					temp = B[(Lx*i)];
+					temp1 = min(A[i], B[(Lx*i)]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
+			}
+		}
+				
+		if(k==3)
+		{
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Lx; i++)
+			{
+				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
+				if(A[i] != 0 && B[(Lx*i) + (Ly-1)] != 0 && A[i]!= B[(Lx*i) + (Ly-1)])
+				{
+					temp = B[(Lx*i) + (Ly-1)];
+					temp1 = min(A[i], B[(Lx*i) + (Ly-1)]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
 			}
 		}
 	}
 
 	if(j==1)
 	{
-		// cout<<"j: "<<j<<endl;
-		for(int i=0; i<Ly; i++)
+
+		if(k==0)
 		{
-			// cout<<i + (Lx-1)*Ly<<","<<A[i + (Lx-1)*Ly]<<" "<<i<<","<<B[i]<<endl;
-			if(A[i + (Lx-1)*Ly] != 0 && B[i] != 0 && A[i + (Lx-1)*Ly]!= B[i])
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Ly; i++)
 			{
-				temp = B[i];
-				temp1 = min(A[i + (Lx-1)*Ly], B[i]);
-				// cout<<A[i + (Lx-1)*Ly]<<","<<B[i]<<endl;
-				replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+				// cout<<i<<","<<A[i]<<" "<<i<<","<<B[i]<<endl;
+				if(A[i + (Lx-1)*Ly] != 0 && B[i] != 0 && A[i + (Lx-1)*Ly]!= B[i])
+				{
+					temp = B[i];
+					temp1 = min(A[i + (Lx-1)*Ly], B[i]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
+			}
+		}
+
+		if(k==1)
+		{
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Ly; i++)
+			{
+				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
+				if(A[i + (Lx-1)*Ly] != 0 && B[i + (Lx-1)*Ly] != 0 && A[i + (Lx-1)*Ly]!= B[i + (Lx-1)*Ly])
+				{
+					temp = B[i + (Lx-1)*Ly];
+					temp1 = min(A[i + (Lx-1)*Ly], B[i + (Lx-1)*Ly]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
+			}
+		}
+		if(k==2)
+		{
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Lx; i++)
+			{
+				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
+				if(A[i + (Lx-1)*Ly] != 0 && B[(Lx*i)] != 0 && A[i + (Lx-1)*Ly]!= B[(Lx*i)])
+				{
+					temp = B[(Lx*i)];
+					temp1 = min(A[i + (Lx-1)*Ly], B[(Lx*i)]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
+			}
+		}
+				
+		if(k==3)
+		{
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Lx; i++)
+			{
+				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
+				if(A[i + (Lx-1)*Ly] != 0 && B[(Lx*i) + (Ly-1)] != 0 && A[i + (Lx-1)*Ly]!= B[(Lx*i) + (Ly-1)])
+				{
+					temp = B[(Lx*i) + (Ly-1)];
+					temp1 = min(A[i + (Lx-1)*Ly], B[(Lx*i) + (Ly-1)]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
 			}
 		}
 	}
 
 	if(j==2)
 	{
-		// cout<<"j: "<<j<<endl;
-		for(int i=0; i<Lx; i++)
+		if(k==0)
 		{
-			// cout<<Lx*i<<","<<A[Lx*i]<<" "<<(Lx*i) + (Ly-1)<<","<<B[(Lx*i) + (Ly-1)]<<endl;
-			if(A[Lx*i] != 0 && B[(Lx*i) + (Ly-1)] != 0 && A[Lx*i]!= B[(Lx*i) + (Ly-1)])
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Ly; i++)
 			{
-				// cout<<A[Lx*i]<<","<<B[(Lx*i) + (Ly-1)]<<endl;
-				temp = B[(Lx*i) + (Ly-1)];
-				temp1 = min(A[Lx*i], B[(Lx*i) + (Ly-1)]);
-				replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+				// cout<<i<<","<<A[i]<<" "<<i<<","<<B[i]<<endl;
+				if(A[Lx*i] != 0 && B[i] != 0 && A[Lx*i]!= B[i])
+				{
+					temp = B[i];
+					temp1 = min(A[Lx*i], B[i]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
+			}
+		}
+
+		if(k==1)
+		{
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Ly; i++)
+			{
+				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
+				if(A[Lx*i] != 0 && B[i + (Lx-1)*Ly] != 0 && A[Lx*i]!= B[i + (Lx-1)*Ly])
+				{
+					temp = B[i + (Lx-1)*Ly];
+					temp1 = min(A[Lx*i], B[i + (Lx-1)*Ly]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
+			}
+		}
+		if(k==2)
+		{
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Lx; i++)
+			{
+				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
+				if(A[Lx*i] != 0 && B[(Lx*i)] != 0 && A[Lx*i]!= B[(Lx*i)])
+				{
+					temp = B[(Lx*i)];
+					temp1 = min(A[Lx*i], B[(Lx*i)]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
+			}
+		}
+				
+		if(k==3)
+		{
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Lx; i++)
+			{
+				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
+				if(A[Lx*i] != 0 && B[(Lx*i) + (Ly-1)] != 0 && A[Lx*i]!= B[(Lx*i) + (Ly-1)])
+				{
+					temp = B[(Lx*i) + (Ly-1)];
+					temp1 = min(A[Lx*i], B[(Lx*i) + (Ly-1)]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
 			}
 		}
 	}
 
 	if(j==3)
 	{
-		// cout<<"j: "<<j<<endl;
-		for(int i=0; i<Lx; i++)
+		if(k==0)
 		{
-			// cout<<(Lx*i) + (Ly-1)<<","<<A[(Lx*i) + (Ly-1)]<<" "<<Lx*i<<","<<B[Lx*i]<<endl;
-			if(A[(Lx*i) + (Ly-1)] != 0 && B[Lx*i] && A[(Lx*i) + (Ly-1)]!= B[Lx*i])
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Ly; i++)
 			{
-				// cout<<A[(Lx*i) + (Ly-1)]<<","<<B[Lx*i]<<endl;
-				temp = B[Lx*i];
-				temp1 = min(A[(Lx*i) + (Ly-1)], B[Lx*i]);
-				replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+				// cout<<i<<","<<A[i]<<" "<<i<<","<<B[i]<<endl;
+				if(A[(Lx*i) + (Ly-1)] != 0 && B[i] != 0 && A[(Lx*i) + (Ly-1)]!= B[i])
+				{
+					temp = B[i];
+					temp1 = min(A[(Lx*i) + (Ly-1)], B[i]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
+			}
+		}
+
+		if(k==1)
+		{
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Ly; i++)
+			{
+				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
+				if(A[(Lx*i) + (Ly-1)] != 0 && B[i + (Lx-1)*Ly] != 0 && A[(Lx*i) + (Ly-1)]!= B[i + (Lx-1)*Ly])
+				{
+					temp = B[i + (Lx-1)*Ly];
+					temp1 = min(A[(Lx*i) + (Ly-1)], B[i + (Lx-1)*Ly]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
+			}
+		}
+		if(k==2)
+		{
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Lx; i++)
+			{
+				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
+				if(A[(Lx*i) + (Ly-1)] != 0 && B[(Lx*i)] != 0 && A[(Lx*i) + (Ly-1)]!= B[(Lx*i)])
+				{
+					temp = B[(Lx*i)];
+					temp1 = min(A[(Lx*i) + (Ly-1)], B[(Lx*i)]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
+			}
+		}
+				
+		if(k==3)
+		{
+			// cout<<"j: "<<j<<endl; Up
+			for(int i=0; i<Lx; i++)
+			{
+				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
+				if(A[(Lx*i) + (Ly-1)] != 0 && B[(Lx*i) + (Ly-1)] != 0 && A[(Lx*i) + (Ly-1)]!= B[(Lx*i) + (Ly-1)])
+				{
+					temp = B[(Lx*i) + (Ly-1)];
+					temp1 = min(A[(Lx*i) + (Ly-1)], B[(Lx*i) + (Ly-1)]);
+					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
+					pbc_union(total, temp, temp1);
+				}
 			}
 		}
 	}
@@ -305,23 +499,54 @@ void HKPBC:: Hks_pbc(vector<int> &A, vector<int> &B, int j)
 
 vector<int> HKPBC:: serial(vector<vector<int>> &niegh, vector<vector<int>> &total, int max_lab)
 {
+	// cout<<niegh.size()<<endl;
 	for (int i=0; i<niegh.size(); i++) //niegh.size()
 	{
-		for (int j=0; j<4; j++)
+		for (int j = 0; j < 4; j++)
 		{
 			// cout<<i<<","<<niegh[i][j]<<endl;
-			Hks_pbc(total[i], total[niegh[i][j]], j);
+			for (int k = 0; k < 4; k++)
+			{
+				// cout<<i<<","<<niegh[niegh[i][j]][k]<<","<<k<<","<<endl;
+				if(niegh[niegh[i][j]][k] == i)
+				{
+					Hks_pbc(total[i], total[niegh[i][j]], total, j, k);
+				}
+			}
 		}
-
 	}
 
-	int clusters[max_lab + 1] = {0};
-	int clus[max_lab];
+	// for (int i=0; i<niegh.size(); i++) //niegh.size()
+	// {
+	// 	for (int j = 0; j < 4; j++)
+	// 	{
+	// 		// cout<<i<<","<<niegh[i][j]<<endl;
+	// 		for (int k = 0; k < 4; k++)
+	// 		{
+	// 			// cout<<i<<","<<niegh[niegh[i][j]][k]<<","<<k<<","<<endl;
+	// 			if(niegh[niegh[i][j]][k] == i)
+	// 			{
+	// 				Hks_pbc(total[i], total[niegh[i][j]], j, k);
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+	std::vector<std::vector<double>> m{ {5, 0, 8}, {3, 1, 9} };
+
+	int x = std::accumulate(total.begin(), total.end(), total[0][0],[](int max, const std::vector<int> &v)
+								{
+									return std::max(max,*std::max_element(v.begin(),v.end()));
+								});
+
+	// cout<<"x: "<<x<<endl;
+	int clusters[x+1] = {0};
+	int clus[x];
 	for(int j=0; j<total.size(); j++)
 	{
 		for(int i=0;i<(Lx*Ly);i++)
 		{  
-			clusters[total[j][i]]++;
+			clusters[total[j][i]]++; //total[j][i]
 		}
 	}
 
@@ -333,16 +558,18 @@ vector<int> HKPBC:: serial(vector<vector<int>> &niegh, vector<vector<int>> &tota
 
 	// cout<<endl;
 
-	copy(clusters + 1, clusters + max_lab +1, clus);
+	copy(clusters + 1, clusters + x +1, clus);
 
+	// int nn = sizeof(clus)/sizeof(clus[0]);
+	// cout<<"nn: "<<nn<<endl;
 	// cout<<"cluster size"<<endl;
-	// for (int i = 0; i < max_lab ; i++)
+	// for (int i = 0; i < nn ; i++)
 	// {
-	// cout<<clus[i]<<",";
+	// 	cout<<clus[i]<<",";
 	// }
 	// cout<<endl;
 	
-	vector<int> cluster_index(max_lab);
+	vector<int> cluster_index(x);
 	std::iota(cluster_index.begin(),cluster_index.end(),0); //Initializing
 	sort( cluster_index.begin(),cluster_index.end(), [&](int i,int j){return clus[i]<clus[j];} );
 	std::for_each(cluster_index.begin(), cluster_index.end(), [](int& d) { d+=1;});
@@ -354,6 +581,8 @@ vector<int> HKPBC:: serial(vector<vector<int>> &niegh, vector<vector<int>> &tota
 	// }
 
 	// cout<<endl;
+
+	uf_done();
 
 	return cluster_index;
 }
