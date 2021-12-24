@@ -1,5 +1,5 @@
-#ifndef __HKPBC_H
-#define __HKPBC_H
+#ifndef __HKPBC_Serial_H
+#define __HKPBC_Serial_H
 #include <vector>
 
 using namespace std;
@@ -27,25 +27,23 @@ public:
 	
 	int uf_find(int x);
 	
-	void uf_pbc(vector<int> &matrix);
+	// void uf_pbc(vector<int> &matrix);
 	
 	int uf_union(int x, int y);
 
-	// int uf_union_g(int x, int y, vector<int> &matrix); 
+	int uf_make_set(void); //void
 
-	int uf_make_set(void);
-
-	void uf_initialize(int max_labels, int last_label, int rank);
+	void uf_initialize(int max_labels);
 
 	void uf_done(void); 
 
-	int HK(vector<int> &matrix, int rank, int last_label);
+	int HK(vector<int> &matrix, int last_label);
 
 	vector<int> serial(vector<vector<int>> &niegh, vector<vector<int>> &total, int max_lab);
 
-	void uf_Ginitialize(int max_labels_g);
+	void Hks_pbc(vector<int> &A, vector<int> &B, vector<vector<int>> &total, int j, int k);
 
-	void Hks_pbc(vector<int> &A, vector<int> &B, int j);
+	void pbc_union(vector<vector<int>> &total, int newlabel, int oldlabel);
 
 	// int uf_find_g(int x, std::vector<int> &matrix);
 

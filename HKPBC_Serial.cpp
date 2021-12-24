@@ -233,16 +233,15 @@ void HKPBC:: Hks_pbc(vector<int> &A, vector<int> &B, vector<vector<int>> &total,
 	{
 		if(k==0)
 		{
-			// cout<<"j: "<<j<<endl; Up
 			for(int i=0; i<Ly; i++)
 			{
-				// cout<<i<<","<<A[i]<<" "<<i<<","<<B[i]<<endl;
 				if(A[i] != 0 && B[i] != 0 && A[i]!= B[i])
 				{
 					temp = B[i];
-					temp1 = min(A[i], B[i]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[i];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
@@ -256,9 +255,10 @@ void HKPBC:: Hks_pbc(vector<int> &A, vector<int> &B, vector<vector<int>> &total,
 				if(A[i] != 0 && B[i + (Lx-1)*Ly] != 0 && A[i]!= B[i + (Lx-1)*Ly])
 				{
 					temp = B[i + (Lx-1)*Ly];
-					temp1 = min(A[i], B[i + (Lx-1)*Ly]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[i];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 
 				}
 			}
@@ -272,9 +272,10 @@ void HKPBC:: Hks_pbc(vector<int> &A, vector<int> &B, vector<vector<int>> &total,
 				if(A[i] != 0 && B[(Lx*i)] != 0 && A[i]!= B[(Lx*i)])
 				{
 					temp = B[(Lx*i)];
-					temp1 = min(A[i], B[(Lx*i)]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[i];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
@@ -288,9 +289,10 @@ void HKPBC:: Hks_pbc(vector<int> &A, vector<int> &B, vector<vector<int>> &total,
 				if(A[i] != 0 && B[(Lx*i) + (Ly-1)] != 0 && A[i]!= B[(Lx*i) + (Ly-1)])
 				{
 					temp = B[(Lx*i) + (Ly-1)];
-					temp1 = min(A[i], B[(Lx*i) + (Ly-1)]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[i];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
@@ -301,32 +303,30 @@ void HKPBC:: Hks_pbc(vector<int> &A, vector<int> &B, vector<vector<int>> &total,
 
 		if(k==0)
 		{
-			// cout<<"j: "<<j<<endl; Up
 			for(int i=0; i<Ly; i++)
 			{
-				// cout<<i<<","<<A[i]<<" "<<i<<","<<B[i]<<endl;
 				if(A[i + (Lx-1)*Ly] != 0 && B[i] != 0 && A[i + (Lx-1)*Ly]!= B[i])
 				{
 					temp = B[i];
-					temp1 = min(A[i + (Lx-1)*Ly], B[i]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[i + (Lx-1)*Ly];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
 
 		if(k==1)
 		{
-			// cout<<"j: "<<j<<endl; Up
 			for(int i=0; i<Ly; i++)
 			{
-				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
 				if(A[i + (Lx-1)*Ly] != 0 && B[i + (Lx-1)*Ly] != 0 && A[i + (Lx-1)*Ly]!= B[i + (Lx-1)*Ly])
 				{
 					temp = B[i + (Lx-1)*Ly];
-					temp1 = min(A[i + (Lx-1)*Ly], B[i + (Lx-1)*Ly]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[i + (Lx-1)*Ly];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
@@ -339,25 +339,25 @@ void HKPBC:: Hks_pbc(vector<int> &A, vector<int> &B, vector<vector<int>> &total,
 				if(A[i + (Lx-1)*Ly] != 0 && B[(Lx*i)] != 0 && A[i + (Lx-1)*Ly]!= B[(Lx*i)])
 				{
 					temp = B[(Lx*i)];
-					temp1 = min(A[i + (Lx-1)*Ly], B[(Lx*i)]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[i + (Lx-1)*Ly];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
 				
 		if(k==3)
 		{
-			// cout<<"j: "<<j<<endl; Up
 			for(int i=0; i<Lx; i++)
 			{
-				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
 				if(A[i + (Lx-1)*Ly] != 0 && B[(Lx*i) + (Ly-1)] != 0 && A[i + (Lx-1)*Ly]!= B[(Lx*i) + (Ly-1)])
 				{
 					temp = B[(Lx*i) + (Ly-1)];
-					temp1 = min(A[i + (Lx-1)*Ly], B[(Lx*i) + (Ly-1)]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[i + (Lx-1)*Ly];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
@@ -367,63 +367,59 @@ void HKPBC:: Hks_pbc(vector<int> &A, vector<int> &B, vector<vector<int>> &total,
 	{
 		if(k==0)
 		{
-			// cout<<"j: "<<j<<endl; Up
 			for(int i=0; i<Ly; i++)
 			{
-				// cout<<i<<","<<A[i]<<" "<<i<<","<<B[i]<<endl;
 				if(A[Lx*i] != 0 && B[i] != 0 && A[Lx*i]!= B[i])
 				{
 					temp = B[i];
-					temp1 = min(A[Lx*i], B[i]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[Lx*i];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
 
 		if(k==1)
 		{
-			// cout<<"j: "<<j<<endl; Up
 			for(int i=0; i<Ly; i++)
 			{
-				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
 				if(A[Lx*i] != 0 && B[i + (Lx-1)*Ly] != 0 && A[Lx*i]!= B[i + (Lx-1)*Ly])
 				{
 					temp = B[i + (Lx-1)*Ly];
-					temp1 = min(A[Lx*i], B[i + (Lx-1)*Ly]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[Lx*i];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
 		if(k==2)
 		{
-			// cout<<"j: "<<j<<endl; Up
 			for(int i=0; i<Lx; i++)
 			{
-				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
 				if(A[Lx*i] != 0 && B[(Lx*i)] != 0 && A[Lx*i]!= B[(Lx*i)])
 				{
 					temp = B[(Lx*i)];
-					temp1 = min(A[Lx*i], B[(Lx*i)]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[Lx*i];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
 				
 		if(k==3)
 		{
-			// cout<<"j: "<<j<<endl; Up
 			for(int i=0; i<Lx; i++)
 			{
-				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
 				if(A[Lx*i] != 0 && B[(Lx*i) + (Ly-1)] != 0 && A[Lx*i]!= B[(Lx*i) + (Ly-1)])
 				{
 					temp = B[(Lx*i) + (Ly-1)];
-					temp1 = min(A[Lx*i], B[(Lx*i) + (Ly-1)]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[Lx*i];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
@@ -433,63 +429,59 @@ void HKPBC:: Hks_pbc(vector<int> &A, vector<int> &B, vector<vector<int>> &total,
 	{
 		if(k==0)
 		{
-			// cout<<"j: "<<j<<endl; Up
 			for(int i=0; i<Ly; i++)
 			{
-				// cout<<i<<","<<A[i]<<" "<<i<<","<<B[i]<<endl;
 				if(A[(Lx*i) + (Ly-1)] != 0 && B[i] != 0 && A[(Lx*i) + (Ly-1)]!= B[i])
 				{
 					temp = B[i];
-					temp1 = min(A[(Lx*i) + (Ly-1)], B[i]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[(Lx*i) + (Ly-1)];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
 
 		if(k==1)
 		{
-			// cout<<"j: "<<j<<endl; Up
 			for(int i=0; i<Ly; i++)
 			{
-				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
 				if(A[(Lx*i) + (Ly-1)] != 0 && B[i + (Lx-1)*Ly] != 0 && A[(Lx*i) + (Ly-1)]!= B[i + (Lx-1)*Ly])
 				{
 					temp = B[i + (Lx-1)*Ly];
-					temp1 = min(A[(Lx*i) + (Ly-1)], B[i + (Lx-1)*Ly]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[(Lx*i) + (Ly-1)];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
 		if(k==2)
 		{
-			// cout<<"j: "<<j<<endl; Up
 			for(int i=0; i<Lx; i++)
 			{
-				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
 				if(A[(Lx*i) + (Ly-1)] != 0 && B[(Lx*i)] != 0 && A[(Lx*i) + (Ly-1)]!= B[(Lx*i)])
 				{
 					temp = B[(Lx*i)];
-					temp1 = min(A[(Lx*i) + (Ly-1)], B[(Lx*i)]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[(Lx*i) + (Ly-1)];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
 				
 		if(k==3)
 		{
-			// cout<<"j: "<<j<<endl; Up
 			for(int i=0; i<Lx; i++)
 			{
-				// cout<<i<<","<<A[i]<<" "<<i + (Lx-1)*Ly<<","<<B[i + (Lx-1)*Ly]<<endl;
 				if(A[(Lx*i) + (Ly-1)] != 0 && B[(Lx*i) + (Ly-1)] != 0 && A[(Lx*i) + (Ly-1)]!= B[(Lx*i) + (Ly-1)])
 				{
 					temp = B[(Lx*i) + (Ly-1)];
-					temp1 = min(A[(Lx*i) + (Ly-1)], B[(Lx*i) + (Ly-1)]);
-					replace(B.begin(), B.end(), temp, temp1); // replaces in-place
-					pbc_union(total, temp, temp1);
+					temp1 = A[(Lx*i) + (Ly-1)];
+					vector<int> tempo{temp1, temp};
+					sort(tempo.begin(), tempo.end(), [](int a, int b) {return a < b;});
+					pbc_union(total, tempo[1], tempo[0]);
 				}
 			}
 		}
@@ -499,15 +491,12 @@ void HKPBC:: Hks_pbc(vector<int> &A, vector<int> &B, vector<vector<int>> &total,
 
 vector<int> HKPBC:: serial(vector<vector<int>> &niegh, vector<vector<int>> &total, int max_lab)
 {
-	// cout<<niegh.size()<<endl;
 	for (int i=0; i<niegh.size(); i++) //niegh.size()
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			// cout<<i<<","<<niegh[i][j]<<endl;
 			for (int k = 0; k < 4; k++)
 			{
-				// cout<<i<<","<<niegh[niegh[i][j]][k]<<","<<k<<","<<endl;
 				if(niegh[niegh[i][j]][k] == i)
 				{
 					Hks_pbc(total[i], total[niegh[i][j]], total, j, k);
@@ -532,7 +521,6 @@ vector<int> HKPBC:: serial(vector<vector<int>> &niegh, vector<vector<int>> &tota
 	// 	}
 	// }
 
-	std::vector<std::vector<double>> m{ {5, 0, 8}, {3, 1, 9} };
 
 	int x = std::accumulate(total.begin(), total.end(), total[0][0],[](int max, const std::vector<int> &v)
 								{
@@ -586,7 +574,5 @@ vector<int> HKPBC:: serial(vector<vector<int>> &niegh, vector<vector<int>> &tota
 
 	return cluster_index;
 }
-
-
 
 
