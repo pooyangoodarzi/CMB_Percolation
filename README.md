@@ -1,2 +1,3 @@
 # CMB_Percolation
-In this project, we tried to determine the CMB Universality Class using the network science and percolation on the full-sky map.
+In this project, we determined the CMB Universality Class using the network science, finite-size scaling (FSS) hypothesis, percolation and extrem value theory on the full-sky map. Instead of performing a traditional FSS analysis at the critical phase transition point, we rather follow the universal framework of a FSS analysis recently developed based on the statistics and critical scaling of the size of the largest gap in the order parameter.
+this project is based on a paper in Nature Physics: Universal gap scaling in percolation. Nat. Phys. 16, 495 (2020). https://doi.org/10.1038/s41567-020-0837-5
