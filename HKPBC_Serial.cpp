@@ -184,13 +184,13 @@ int HKPBC::HK(vector<int> &matrix, int last_label) //vector<int>
 	//  	}
 	//    cout<<endl;
 	  
-	  int clusters[total_clusters + 1] = {0};
-	  int clus[total_clusters];
+	  vector<int> clusters(total_clusters + 1, 0);
+	  vector<int> clus;
 	  for(int i=0;i<(Lx*Ly);i++)
 		{  
 			clusters[matrix[i]]++;
 		}
-	  copy(clusters + 1, clusters + total_clusters +1, clus);
+	  copy(clusters.begin() + 1, clusters.end(), back_inserter(clus));
 	//   cout<<"cluster size"<<endl;
 	//   for (int i = 0; i < total_clusters ; i++)
 	//   {
