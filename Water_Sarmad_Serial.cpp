@@ -22,11 +22,13 @@
 
 using namespace std;
 
-#define N 12288
+
 #define Lx 32
 #define Ly 32
 #define Nsplit 1
 #define patch_count 12
+#define N Lx*Ly*patch_count
+#define PI 3.14159265358979323846
 
 
 vector<vector<int>> split (const vector<int>& v, int Num);
@@ -214,7 +216,7 @@ double cosine(vector<double> plat)
     double sum = 0;
     for (int i = 0; i < plat.size(); i++)
     {
-        sum = sum + abs(cos(plat[i]));
+        sum = sum + abs(cos(plat[i]*PI/180.0));
     }
     return sum;
 }
