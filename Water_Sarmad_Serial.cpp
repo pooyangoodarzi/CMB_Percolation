@@ -23,10 +23,10 @@
 using namespace std;
 
 
-#define Lx 32
-#define Ly 32
+#define Lx 90
+#define Ly 90
 #define Nsplit 1
-#define patch_count 12
+#define patch_count 8
 #define N Lx*Ly*patch_count
 #define PI 3.14159265358979323846
 
@@ -83,7 +83,7 @@ int main()
     }
 
     std::string line2;
-    std::ifstream myFile4("/home/complex/HK_Serial/niegh.txt"); 
+    std::ifstream myFile4("/home/complex/HK_Serial/nieghearth.txt"); 
     while(getline(myFile4, line2))
     {
         std::istringstream lineStream(line2);
@@ -91,8 +91,8 @@ int main()
         lineStream >> first1;
         temp.push_back(first1);
     }
-    
-    auto niegh = split(temp, 12);
+    cout<<"hi"<<endl;
+    auto niegh = split(temp, patch_count);
 
     //calculating cosine of the all the elements in plat
     total_lat = cosine(plat);
@@ -102,7 +102,12 @@ int main()
     vector<int> indexes(patch_count*Lx*Ly);
     std::iota(indexes.begin(),indexes.end(),0); //Initializing
     sort(indexes.begin(), indexes.end(), [&](int i,int j){return pmap_tot[i]<pmap_tot[j];} );
-
+    // for (size_t i = 0; i < indexes.size(); i++)
+    // {
+    //     cout<<indexes[i]<<" ";
+    // }
+    // cout<<endl;
+    
     //Defining PBS Variables
     auto PBS_index = split(indexes, Nsplit);
     int PBS_counter = 0;
@@ -116,7 +121,7 @@ int main()
     divisions = Divisors(PBS_index[0].size());
     int num_iter = divisions[ceil(divisions.size()/2)];
     int num_proc = int(PBS_index[0].size()/num_iter);
-    // int num_iter = 12288;
+    // int num_iter = N;
     // int num_proc = 1;
     printf("num_proc = %d \n", num_proc);
     printf("num_iter = %d \n", num_iter);
@@ -151,10 +156,10 @@ int main()
     // }
 
     //saving the data in npy format
-    string path1 = "/home/complex/HK_Serial/Result/";
-    string path = "/home/complex/HK_Serial/Result/";
-    string filename = "total_landmass_" + to_string(32) + "_" + to_string(PBS_counter) + ".txt";
-    string filename1 = "big_cluster_" + to_string(32) + "_" + to_string(PBS_counter) + ".txt";
+    string path1 = "/home/complex/HK_Serial/";
+    string path = "/home/complex/HK_Serial/";
+    string filename = "total_landmass_" + to_string(8) + "_" + to_string(PBS_counter) + ".txt";
+    string filename1 = "big_cluster_" + to_string(8) + "_" + to_string(PBS_counter) + ".txt";
 
 
     std::ofstream fout(path + filename);
@@ -216,7 +221,7 @@ double cosine(vector<double> plat)
     double sum = 0;
     for (int i = 0; i < plat.size(); i++)
     {
-        sum = sum + abs(cos(plat[i]*PI/180.0));
+        sum = sum + abs(cos(plat[i]));
     }
     return sum;
 }
@@ -240,15 +245,10 @@ vector<vector<double>> water_clusters(int ii, int const& num_iter, vector<int> i
         }
 
         auto newarr = split(myBoolArray, patch_count);
-        int lastlab = 0;
 
-        for(int k =0; k < patch_count; k++)
-        {
-            lastlab = object.HK(newarr[k], lastlab);
-            // cout<<"lastlab: "<<lastlab<<endl;
-        }
-        s = object.serial(niegh, newarr, lastlab);
-
+        // cout<<"hi"<<endl;
+        s = object.HK(newarr, niegh);
+        // cout<<"hihi"<<endl;
         auto myvector = flatten(newarr);
 
         // cout<<"size: "<<myvector.size()<<endl;
