@@ -33,20 +33,15 @@ public:
 
 	int uf_make_set(void); //void
 
-	void uf_initialize(int max_labels);
+	void uf_initialize(int total_size, int max_labels);
 
 	void uf_done(void); 
 
-	int HK(vector<int> &matrix, int last_label);
+	vector<int> HK(vector<vector<int>> &matrix, vector<vector<int>> &niegh);
 
-	vector<int> serial(vector<vector<int>> &niegh, vector<vector<int>> &total, int max_lab);
+	void Hks_pbc(vector<vector<int>> &total, int j, int k, int g, int f);
 
-	void Hks_pbc(vector<int> &A, vector<int> &B, vector<vector<int>> &total, int j, int k);
-
-	void pbc_union(vector<vector<int>> &total, int newlabel, int oldlabel);
-
-	// int uf_find_g(int x, std::vector<int> &matrix);
-
+	void union_g(vector<vector<int>> total, int g, int f, int p, int q);
 	
 };
 #endif
