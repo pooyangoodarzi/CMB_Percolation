@@ -9,3 +9,7 @@ the algorithm:
 Since the network has explosive percolation, there is no finite-size effect for the different sizes of the lattice; this means that; I should have the same results even for big coursed grained lattices.
 Here are the code results in comparison to the paper's results.
 
+- Item 1
+- Item 2
+- Item 3
+
