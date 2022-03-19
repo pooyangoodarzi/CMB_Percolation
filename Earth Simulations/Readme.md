@@ -7,6 +7,7 @@ the algorithm:
 - We turn on each node in an increasing order.
 - We use the Hoshen-Kopelman algorithm with periodic boundary conditions on the zonal sides of the lattice to simulate the earth's spherical shape.
 - We add the effect of the spherical form of the earth by calculating the cosine of the latitude of the used nodes in each step and we find the biggest cluster.
+
 Since the network has explosive percolation, there is no finite-size effect for the different sizes of the lattice; this means that; I should have the same results even for big coursed grained lattices.
 Here are the code results in comparison to the paper's results.
 
