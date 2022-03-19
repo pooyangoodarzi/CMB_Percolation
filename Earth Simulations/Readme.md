@@ -11,3 +11,9 @@ the algorithm:
 Since the network has explosive percolation, there is no finite-size effect for the different sizes of the lattice; this means that; I should have the same results even for big coursed grained lattices.
 Here are the code results in comparison to the paper's results.
 
+![](images/Screenshot_20220226_161016.png)
+![](images/e2CjMOKB.jpeg)
+
+We also drived the exponents for the Water clusters this exponents are not reported by writers of the paper:
+
+![](images/water_expo.jpg)
